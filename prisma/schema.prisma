@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserAccount {
+  id  Int    @id @default(autoincrement())
+  uid String @unique
+
+  email      String  @unique
+  username   String  @unique
+  profileUrl String?
+
+  role UserRole
+
+  posts Post[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  provider  String?
+  lastLogin DateTime?
+
+  Attachment Attachment[]
+  Project    Project[]
+}
+
+model Post {
+  id   Int    @id @default(autoincrement())
+  slug String @unique
+
+  owner   UserAccount? @relation(fields: [ownerId], references: [id])
+  ownerId Int?
+
+  title   String
+  content String?
+
+  thumbnailImage   Attachment? @relation(fields: [thumbnailImageId], references: [id])
+  thumbnailImageId Int?
+
+  excerpt String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Attachment {
+  id           Int    @id @default(autoincrement())
+  filename     String
+  originalName String
+  size         Int
+  mimetype     String
+  url          String
+  path         String
+
+  owner   UserAccount? @relation(fields: [ownerId], references: [id])
+  ownerId Int?
+
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  // generic relation 
+  objectId   Int?
+  objectType ContentTypeGeneric?
+  Project    Project?            @relation(fields: [projectId], references: [id])
+  projectId  Int?
+  Post       Post[]
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum ContentTypeGeneric {
+  UserAccount
+  Post
+  Attachment
+}
+
+model Project {
+  id          Int     @id @default(autoincrement())
+  slug        String  @unique
+  name        String
+  description String?
+
+  files ProjectFile[]
+
+  owner   UserAccount? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Attachment Attachment[]
+}
+
+model ProjectFile {
+  id       Int     @id @default(autoincrement())
+  name     String
+  path     String // e.g., "/src/index.js", "/README.md" (unique within a project)
+  content  String  @default("")
+  language String?
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Ensure unique paths within a project
+  @@unique([projectId, path])
+}
