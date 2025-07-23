@@ -6,7 +6,7 @@
  *
  * Docs
  *  - tRPC v11 context:  https://trpc.io/docs/v11/context
- *  - Next‑Auth session: https://next-auth.js.org/getting-started/typescript
+ * 
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";

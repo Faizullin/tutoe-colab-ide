@@ -1,11 +1,12 @@
 "use client";
 
+import TiptapEditor from "@/components/tt-rich-editor/tiptap-editor";
 import useTiptapEditor, {
   UseTiptapEditorOptions,
 } from "@/components/tt-rich-editor/tiptap-editor/hooks/useTiptapEditor";
 import ExtensionKit from "@/components/tt-rich-editor/tiptap-editor/kit";
-import { EditorContent } from "@tiptap/react";
 import { useEffect, useRef } from "react";
+import "@/styles/tt-editor.css";
 
 export default function RenderContent({ md }: { md: string }) {
   const contentElement = useRef<HTMLDivElement | null>(null);
@@ -30,11 +31,20 @@ export default function RenderContent({ md }: { md: string }) {
       }, 0);
     }
   }, [editor, md]);
+  //p aste md as simple html code
+  // return (
+  //   <div>
+  //     <div dangerouslySetInnerHTML={{ __html: md }} />
+  //   </div>
+  // )
   return (
-    <EditorContent
-      ref={contentElement}
-      editor={editor}
-      className="rte-editor__content"
+    <TiptapEditor
+      ssr={true}
+      output="html"
+      readonly={true}
+      hideMenuBar={true}
+      hideStatusBar={true}
+      initialContent={md}
     />
   );
   // swap for `react-markdown` later if you like
