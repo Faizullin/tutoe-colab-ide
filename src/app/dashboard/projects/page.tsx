@@ -1,5 +1,10 @@
 import { ProjectTableView } from "./_components/table-view";
 
+export const metadata = {
+  title: "Projects",
+  description: "Manage your projects here.",
+};
+
 export default async function Page() {
   return (
     <div className="flex flex-col gap-4 md:gap-6">

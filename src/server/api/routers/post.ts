@@ -43,6 +43,7 @@ const createPostInputSchema = z.object({
   }),
   content: z.string().optional(),
   slug: documentSlugValidator(),
+  thumbnailImageId: documentIdValidator().nullable().optional(),
 });
 
 export const postRouter = router({
@@ -67,6 +68,17 @@ export const postRouter = router({
           orderBy: { [orderBy.field]: orderBy.direction },
           skip: pagination.skip,
           take: pagination.take,
+          include: {
+            thumbnailImage: {
+              select: {
+                id: true,
+                mimetype: true,
+                size: true,
+                filename: true,
+                url: true,
+              }
+            }
+          }
         }),
         ctx.prisma.post.count({ where }),
       ]);
@@ -160,6 +172,15 @@ export const postRouter = router({
               email: true,
             },
           },
+          thumbnailImage: {
+            select: {
+              id: true,
+              mimetype: true,
+              size: true,
+              filename: true,
+              url: true,
+            }
+          }
         },
       });
       if (!post) throw new Error("Post not found");
@@ -183,6 +204,7 @@ export const postRouter = router({
             title: input.title,
             content: input.content || "",
             slug: input.slug,
+            thumbnailImageId: input.thumbnailImageId || null,
           },
         }),
       };
@@ -201,6 +223,8 @@ export const postRouter = router({
           data: {
             title: input.title,
             content: input.content || "",
+            slug: input.slug,
+            thumbnailImageId: input.thumbnailImageId || null,
           },
         }),
       };

@@ -1,5 +1,6 @@
 import {
   BookIcon,
+  CodeIcon,
   LayoutDashboard,
   type LucideIcon
 } from "lucide-react";
@@ -44,6 +45,11 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/posts",
         icon: BookIcon,
       },
+      {
+        title: "Projects",
+        url: "/dashboard/projects",
+        icon: CodeIcon,
+      }
     ],
   },
 ];

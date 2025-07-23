@@ -1,33 +1,64 @@
+
+"use client";
+
+import AsyncSelect from '@/components/combobox/async-select';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Project } from '@/generated/prisma';
+import { Log } from '@/lib/log';
 import { trpc } from '@/utils/trpc';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTiptapContext } from '../Provider';
 
 export const CodeLabToolbarButton: React.FC = () => {
   const { editor } = useTiptapContext();
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<Project | null>(null);
+  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState<{
+    value: string;
+    label: string;
+  } | null>(null)
+  const [initialData, setInitialData] = useState<Project[]>([]);
+  const trpcUtils = trpc.useUtils();
 
-  // Replace with your actual trpc query for codelabs
-  const loadCodeLabsQuery = trpc.project.adminList.useQuery({
-    filter: {
-      name: search,
+  const handleSave = useCallback(() => {
+    const foundItem = initialData.find(item => value && `${item.id}` === value.value);
+    if (!foundItem) {
+      alert("CodeLab not found");
+      return;
     }
-  });
+    // Insert CodeLabs into the editor
+    editor.chain().focus().insertCodeLab(foundItem).run();
 
-  const handleSelect = (projectObj: Project) => {
-    setSelected(id);
-    editor?.commands.setCodeLab(projectObj);
     setOpen(false);
+  }, [editor, initialData, value]);
+
+
+  // Use trpcUtils.project.adminList.fetch for live search
+  const loadOptions = async (inputValue: string) => {
+    try {
+      const data = await trpcUtils.project.adminList.fetch({
+        filter: {
+          name: inputValue || undefined,
+        },
+      }, {
+        staleTime: 0,
+        gcTime: 0,
+      });
+      setInitialData(data.items || []);
+      const options = (data?.items || []).map(item => ({
+        value: `${item.id}`,
+        label: `${item.name} [#${item.id}]`,
+      }));
+      return options;
+    } catch (e) {
+      Log.error("Error loading options:", e);
+      return [];
+    }
   };
 
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)}>
+      <Button variant="outline" onClick={() => setOpen(true)} type='button'>
         Insert CodeLab
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -35,27 +66,27 @@ export const CodeLabToolbarButton: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Select a CodeLab</DialogTitle>
           </DialogHeader>
-          <Input
-            placeholder="Search CodeLab..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            autoFocus
-          />
-          <div className="mt-4 max-h-60 overflow-auto">
-            {loadCodeLabsQuery.isLoading ? (
-              <div>Loading...</div>
-            ) : (
-              loadCodeLabsQuery.data?.items?.map((lab) => (
-                <div
-                  key={lab.id}
-                  className="cursor-pointer px-2 py-1 hover:bg-muted rounded"
-                  onClick={() => handleSelect(lab)}
-                >
-                  {lab.name} [#{lab.id}]
-                </div>
-              ))
-            )}
+          <div className="py-4">
+            <AsyncSelect
+              cacheOptions
+              loadOptions={loadOptions}
+              onChange={(v) => setValue(v as any)}
+              defaultOptions
+            />
           </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              aria-label="Delete selected rows"
+              variant="destructive"
+              onClick={handleSave}
+              disabled={!value}
+            >
+              Save
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

@@ -1,6 +1,5 @@
 "use client";
 
-import CodeSuggestion from "@/components/basic-editor/CodeSuggestion/codeSuggesstion";
 import PythonTutorVisualizationEditor from "@/components/editor";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,15 +7,13 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Switch } from "@/components/ui/switch";
 import { useControlledToggle } from "@/hooks/use-controlled-toggle";
 import { cn } from "@/lib/utils";
 import { useAIStore } from "@/store/useAIStore";
 import { defaultEditorOptions, SupportedLanguage } from "@/utils/editor-config";
 import { Editor } from "@monaco-editor/react";
-import { Lightbulb, Maximize2, Save, Smartphone, XCircle } from "lucide-react";
+import { Maximize2, Smartphone, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { useProjectEditor, useProjectEditorContent } from "./context";
 import { DemoContainer } from "./demo-container";
 import EditorHeader from "./editor-header";
@@ -24,17 +21,13 @@ import FileExplorer from "./file-explorer";
 import SidebarNav from "./sidebar-nav";
 import TerminalPanel from "./terminal-panel";
 import { EditProjectFile } from "./types";
-import { Log } from "@/lib/log";
 
 export function EditorRender() {
   const {
-    loading: initialLoading,
     currentEditProjectFileUid,
     setCurrentEditProjectFileUid,
-    saveProjectFileContentMutation,
     projectFileListQuery,
     project,
-    demo,
   } = useProjectEditor();
   const { editorRef: storeEditorRef } = useProjectEditorContent();
   const [isDirty, setIsDirty] = useState(false);
@@ -51,9 +44,6 @@ export function EditorRender() {
     output,
   } = useProjectEditorContent();
 
-  const [aiSuggestionsEnabled, setAiSuggestionsEnabled] = useState(false);
-  const [showAiSettingsPanel, setShowAiSettingsPanel] = useState(false);
-  const codeSuggestionRef = useRef<any>(null);
   const [files, setFiles] = useState<EditProjectFile[]>([]);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -105,7 +95,7 @@ export function EditorRender() {
           prev.map((f) =>
             f.uid === selectedFile.uid
               ? options?.overrideFile ||
-                ({ ...f, file: { ...f.file, content } } as EditProjectFile)
+              ({ ...f, file: { ...f.file, content } } as EditProjectFile)
               : f
           )
         );
@@ -134,33 +124,6 @@ export function EditorRender() {
     // }
   };
 
-  const handleSaveFile = async () => {
-    if (!selectedProjectFile) {
-      throw new Error(`selectedProjectFile can not be null!`);
-    }
-    if (!selectedProjectFile.synced) {
-      throw new Error(`selectedProjectFile must be synced`);
-    }
-    try {
-      const response = await saveProjectFileContentMutation.mutateAsync({
-        id: selectedProjectFile.file.id,
-        content: fileContent,
-        language: language,
-      });
-      setContent(response.content, {
-        isDirty: false,
-        overrideFile: {
-          ...selectedProjectFile,
-          file: response,
-        },
-      });
-      toast.success("File saved successfully!");
-    } catch (error) {
-      toast.error("Failed to save file");
-      Log.error("Error saving file:", error);
-    }
-  };
-
   const toggleSidebar = () => {
     setCollapsedSidebar(!collapsedSidebar);
   };
@@ -169,21 +132,6 @@ export function EditorRender() {
     if (!editorRef.current) {
       editorRef.current = editor;
       storeEditorRef.current = editor;
-    }
-  };
-
-  // Toggle AI suggestions and panel
-  const toggleAiSuggestions = () => {
-    setShowAiSettingsPanel(!showAiSettingsPanel);
-  };
-
-  // Force suggestions to generate when button is clicked
-  const handleForceSuggestions = () => {
-    if (
-      codeSuggestionRef.current &&
-      typeof codeSuggestionRef.current.forceFetchSuggestions === "function"
-    ) {
-      codeSuggestionRef.current.forceFetchSuggestions();
     }
   };
 
@@ -255,11 +203,6 @@ export function EditorRender() {
   }, [currentEditProjectFileUid, setLoadFilesControlledToggleValue]);
 
   const [maximized, setMaximized] = useState(false);
-  const saveFileDisabled =
-    saveProjectFileContentMutation.isPending ||
-    initialLoading ||
-    !isDirty ||
-    demo;
 
   if (isMobile) {
     return (
@@ -354,31 +297,7 @@ export function EditorRender() {
                             )}
                           </div>
 
-                          <Button
-                            size="default"
-                            variant="ghost"
-                            className={`h-7 px-2 ${
-                              aiSuggestionsEnabled
-                                ? "text-yellow-400 hover:text-yellow-300"
-                                : "text-gray-400 hover:text-gray-300"
-                            } hover:bg-[#252525] transition-colors`}
-                            onClick={toggleAiSuggestions}
-                          >
-                            <Lightbulb className="h-3.5 w-3.5 mr-1" />
-                            AI Suggestions
-                          </Button>
                           <div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2 text-emerald-400 hover:text-emerald-300 hover:bg-[#252525] transition-colors"
-                              onClick={handleSaveFile}
-                              disabled={saveFileDisabled}
-                            >
-                              <Save className="h-3.5 w-3.5 mr-1" />
-                              Save
-                            </Button>
-
                             <Button
                               variant="ghost"
                               size="icon"
@@ -390,37 +309,6 @@ export function EditorRender() {
                           </div>
                         </div>
 
-                        {showAiSettingsPanel && (
-                          <div className="px-4 py-2 border-b border-gray-500 bg-[#474545] flex items-center justify-between">
-                            <div className="flex items-center">
-                              <span className="text-sm text-gray-300 mr-3">
-                                Enable AI suggestions
-                              </span>
-                              <Switch
-                                checked={aiSuggestionsEnabled}
-                                onCheckedChange={(checked: boolean) => {
-                                  setAiSuggestionsEnabled(checked);
-                                  if (checked) {
-                                    handleForceSuggestions();
-                                  }
-                                }}
-                                className=" data-[state=checked]:bg-emerald-600"
-                              />
-                            </div>
-                            <div className="flex items-center">
-                              {aiSuggestionsEnabled && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 px-3 text-xs bg-emerald-400/30 hover:bg-emerald-800/50 border-emerald-700 text-emerald-400 hover:text-emerald-300 mr-2"
-                                  onClick={handleForceSuggestions}
-                                >
-                                  Generate Now
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        )}
                         <ResizablePanelGroup
                           direction="horizontal"
                           className="h-full"
@@ -485,14 +373,6 @@ export function EditorRender() {
                                     </div>
                                   </div>
                                 }
-                              />
-
-                              <CodeSuggestion
-                                ref={codeSuggestionRef}
-                                code={fileContent}
-                                editorRef={editorRef}
-                                onApplySuggestion={setContent}
-                                isEnabled={aiSuggestionsEnabled}
                               />
                             </div>
                           </ResizablePanel>

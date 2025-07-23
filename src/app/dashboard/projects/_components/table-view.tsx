@@ -5,14 +5,17 @@ import { DataTableColumnHeader } from "@/components/data-table/data-table-column
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { useDataTable } from "@/components/data-table/use-data-table";
+import DeleteConfirmDialog, { useDeleteConfirmDialogControl } from "@/components/resource/delete-confirm-dialog";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { Project } from "@/generated/prisma";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { Column, ColumnDef } from "@tanstack/react-table";
-import { PlusIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Edit, MoreHorizontal, PlusIcon, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Heading } from "../../_components/common/heading";
 import {
   CreateProjectDialog,
@@ -22,7 +25,33 @@ import {
 type QueryParams = Parameters<typeof trpc.project.adminList.useQuery>[0];
 
 export function ProjectTableView() {
+  const router = useRouter();
+  const deleteMutation = trpc.project.protectedDeleteProject.useMutation();
   const createProjectDialogControl = useCreateProjectDialogControl();
+  const deleteConfirmDialogControl = useDeleteConfirmDialogControl<Project>({
+    onConfirm: ({ items }) => {
+      if (items?.length === 1) {
+        deleteMutation.mutateAsync(items[0].id).then(() => {
+          deleteConfirmDialogControl.close();
+        });
+      }
+    },
+  });
+
+  const openDeleteDialog = useCallback(
+    (obj: Project) => {
+      deleteConfirmDialogControl.openWithData({
+        items: [obj],
+      });
+    }
+    , [deleteConfirmDialogControl]);
+
+  const openEdit = useCallback(
+    (obj: Project) => {
+      router.push(`/dashboard/projects/${obj.id}/`);
+    },
+    [router]
+  );
 
   // Define columns
   const columns = useMemo<ColumnDef<Project>[]>(
@@ -108,8 +137,46 @@ export function ProjectTableView() {
         enableSorting: true,
         enableColumnFilter: false,
       },
+
+      {
+        id: "actions",
+        cell: ({ row }) => {
+          const obj = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => openEdit(obj)}
+              >
+                <Edit className="h-4 w-4" />
+                <span className="sr-only">Edit</span>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[160px]">
+                  <DropdownMenuItem
+                    onSelect={() => openDeleteDialog(obj)}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        },
+        enableSorting: false,
+      },
     ],
-    []
+    [openDeleteDialog, openEdit]
   );
 
   const [parsedData, setParsedData] = useState<Project[]>([]);
@@ -197,6 +264,7 @@ export function ProjectTableView() {
         )}
       </div>
       <CreateProjectDialog control={createProjectDialogControl} />
+      <DeleteConfirmDialog control={deleteConfirmDialogControl} />
     </>
   );
 }

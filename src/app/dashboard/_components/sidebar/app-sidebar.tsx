@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, CircleHelp, Search, Database, ClipboardList, File, Command } from "lucide-react";
+import { Command } from "lucide-react";
 
 import {
   Sidebar,
@@ -12,48 +12,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+import { sidebarItems } from "@/config/nav-items";
+import { useUser } from "@clerk/nextjs";
+import { useMemo } from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { sidebarItems } from "@/config/nav-items";
-import { useMemo } from "react";
-import { useUser } from "@clerk/nextjs";
-
-const data = {
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: CircleHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: Search,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: Database,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardList,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: File,
-    },
-  ],
-};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser()

@@ -1,5 +1,3 @@
-import AiButton from "@/components/basic-editor/AiButton";
-import ConversionCodePanel from "@/components/basic-editor/codeConversion/conversion";
 import { usePythonTutorVisualizationEditor } from "@/components/editor/context";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,7 +54,7 @@ export default function EditorHeader({
         </Button>
         <div className="flex items-center gap-2">
           <Code2 className="w-5 h-5 text-emerald-400" />
-          <span className="font-medium text-gray-200">CodeX</span>
+          <span className="font-medium text-gray-200">TutorIDE</span>
           {fileName && (
             <>
               <span className="text-gray-500 mx-1">-</span>
@@ -70,9 +68,6 @@ export default function EditorHeader({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* <RoomPanel/> */}
-        <ConversionCodePanel />
-        <AiButton />
 
         <div className="h-6 w-px bg-gray-800" />
 
@@ -103,11 +98,10 @@ export default function EditorHeader({
           onClick={handleRunCode}
           disabled={runCodeMutation.isPending}
           size="sm"
-          className={`text-white gap-1 h-8 px-3 transition-colors ${
-            runCodeMutation.isPending
-              ? "bg-emerald-600 opacity-80 cursor-not-allowed"
-              : "bg-emerald-600 hover:bg-emerald-500"
-          }`}
+          className={`text-white gap-1 h-8 px-3 transition-colors ${runCodeMutation.isPending
+            ? "bg-emerald-600 opacity-80 cursor-not-allowed"
+            : "bg-emerald-600 hover:bg-emerald-500"
+            }`}
         >
           <Play className="w-3.5 h-3.5" />
           {runCodeMutation.isPending ? "Running..." : "Run Code"}

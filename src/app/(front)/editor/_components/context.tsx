@@ -125,7 +125,7 @@ const ProjectEditorContentContext =
     setCode: function (): void {
       throw new Error("Function not implemented.");
     },
-    language: "javascript",
+    language: "cpp",
     setLanguage: function (): void {
       throw new Error("Function not implemented.");
     },
@@ -155,7 +155,7 @@ export const ProjectEditorContentProvider = ({
 }: PropsWithChildren) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [code, setCode] = useState<string>("");
-  const [language, setLanguage] = useState<SupportedLanguage>("javascript");
+  const [language, setLanguage] = useState<SupportedLanguage>("cpp");
   const [status, setStatus] = useState<RunStatus>("idle");
   const [output, setOutput] = useState("");
 

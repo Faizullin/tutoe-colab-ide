@@ -11,15 +11,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { trpc } from "@/utils/trpc";
-import { Edit, FileCode, Plus, RefreshCw, Trash2Icon } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Edit, FileCode, Plus, Trash2Icon } from "lucide-react";
 import {
   Dispatch,
   SetStateAction,
-  useCallback,
   useMemo,
-  useState,
+  useState
 } from "react";
 import { toast } from "sonner";
 import { useProjectEditor } from "./context";
@@ -48,9 +45,8 @@ function FileExplorerItem({
 
   return (
     <div
-      className={`flex items-center gap-2 px-2 py-1.5 hover:bg-[#252525] ${
-        isSelected ? "bg-[#2a2a2a] border-l-2 border-emerald-400" : ""
-      } text-gray-300 hover:text-white rounded cursor-pointer group transition-colors`}
+      className={`flex items-center gap-2 px-2 py-1.5 hover:bg-[#252525] ${isSelected ? "bg-[#2a2a2a] border-l-2 border-emerald-400" : ""
+        } text-gray-300 hover:text-white rounded cursor-pointer group transition-colors`}
       style={{ paddingLeft: `${level * 8 + 8}px` }}
       onClick={() => onFileSelect && onFileSelect(item)}
       onMouseEnter={() => setIsHovered(true)}
@@ -130,16 +126,10 @@ export default function FileExplorer({
   files: EditProjectFile[];
   setFiles: Dispatch<SetStateAction<EditProjectFile[]>>;
 }) {
-  const trpcUtils = trpc.useUtils();
   const {
-    addProjectFileMutation,
     currentEditProjectFileUid,
     setCurrentEditProjectFileUid,
-    project,
-    deleteProjectFileMutation,
     loading,
-    saveProjectFileContentMutation,
-    demo,
   } = useProjectEditor();
   // const [searchTerm, setSearchTerm] = useState("");
   const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
@@ -151,7 +141,6 @@ export default function FileExplorer({
     null
   );
   const [fileToEdit, setFileToEdit] = useState<EditProjectFile | null>(null);
-  const session = useSession();
 
   const handleCreateFile = async () => {
     if (!fileName.trim()) {
@@ -159,80 +148,38 @@ export default function FileExplorer({
       return;
     }
 
-    if (session.status !== "authenticated" || demo) {
-      const newFile: EditProjectFile = {
-        uid: `${Date.now()}-${fileName}`,
-        synced: false,
-        file: {
-          name: fileName,
-          content: "",
-          language: "",
-        },
-      };
-
-      const updatedFiles = [...files, newFile];
-      setFiles(updatedFiles);
-      // EditorStorageService.setStorageData();
-
-      toast.success("File created locally!");
-      setIsNewFileModalOpen(false);
-      setFileName("");
-      setCurrentEditProjectFileUid(newFile.uid);
-      return;
-    }
-
-    try {
-      await addProjectFileMutation.mutateAsync({
-        language: "plaintext", // Default language, can be changed later
+    const newFile: EditProjectFile = {
+      uid: `${Date.now()}-${fileName}`,
+      synced: false,
+      file: {
         name: fileName,
-        projectId: project!.id,
-      });
-      toast.success("File created successfully!");
-      setIsNewFileModalOpen(false);
-      setFileName("");
-      trpcUtils.project.protectedUserProjectFileList.invalidate(project!.id);
-    } catch (error: any) {
-      if (error.status === 403) {
-        setIsNewFileModalOpen(false);
-        // setIsFileLimitModalOpen(true);
-      } else {
-        toast.error("Failed to create file.");
-        console.error("Error creating file:", error);
-      }
-    }
-  };
+        content: "",
+        language: "",
+      },
+    };
+
+    const updatedFiles = [...files, newFile];
+    setFiles(updatedFiles);
+    // EditorStorageService.setStorageData();
+
+    toast.success("File created locally!");
+    setIsNewFileModalOpen(false);
+    setFileName("");
+    setCurrentEditProjectFileUid(newFile.uid);
+  }
 
   const handleDeleteFile = async () => {
     if (!fileToDelete) return;
 
-    if (session.status !== "authenticated" || demo) {
-      // Delete file locally for unauthenticated users
-      const updatedFiles = files.filter((f) => f.uid !== fileToDelete.uid);
-      setFiles(updatedFiles);
-      // localStorage.setItem("localFiles", JSON.stringify(updatedFiles));
+    const updatedFiles = files.filter((f) => f.uid !== fileToDelete.uid);
+    setFiles(updatedFiles);
+    // localStorage.setItem("localFiles", JSON.stringify(updatedFiles));
 
-      toast.success("File deleted locally!");
-      setIsDeleteModalOpen(false);
-      setFileToDelete(null);
-      return;
-    }
-    if (!fileToDelete.synced) {
-      throw new Error(`fileToDelete  must be synced`);
-    }
-
-    try {
-      await deleteProjectFileMutation.mutateAsync(fileToDelete.file.id);
-      toast.success("File deleted successfully!");
-      setIsDeleteModalOpen(false);
-      setFileToDelete(null);
-      trpcUtils.project.protectedUserProjectFileList.invalidate(project!.id);
-    } catch (error) {
-      toast.error("Failed to delete file.");
-      console.error("Error deleting file:", error);
-    }
+    toast.success("File deleted locally!");
+    setIsDeleteModalOpen(false);
+    setFileToDelete(null);
   };
 
-  const saveMutationAsync = saveProjectFileContentMutation.mutateAsync;
   const handleRename = async () => {
     if (!fileToEdit) {
       toast.error("No file selected for editing.");
@@ -242,34 +189,15 @@ export default function FileExplorer({
       toast.error("File name cannot be empty.");
       return;
     }
-    if (!fileToEdit.synced) {
-      throw new Error(`fileToEdit must be synced`);
-    }
-    if (session.status !== "authenticated" || demo) {
-      // Edit file locally for unauthenticated users
-      const updatedFiles = files.map((f) =>
-        f.uid === fileToEdit.uid ? { ...f, name: fileName } : f
-      );
-      setFiles(updatedFiles);
-      toast.success(`File renamed to "${fileName}" locally!`);
-      setIsEditModalOpen(false);
-      setFileToEdit(null);
-      setFileName("");
-      return;
-    }
-    try {
-      await saveMutationAsync({
-        id: fileToEdit.file.id,
-        name: fileName,
-      });
-      toast.success(`File renamed to "${fileName}" successfully!`);
-      setIsEditModalOpen(false);
-      setFileToEdit(null);
-      setFileName("");
-      trpcUtils.project.protectedUserProjectFileList.invalidate(project!.id);
-    } catch {
-      toast.error("Failed to rename file.");
-    }
+
+    const updatedFiles = files.map((f) =>
+      f.uid === fileToEdit.uid ? { ...f, name: fileName } : f
+    );
+    setFiles(updatedFiles);
+    toast.success(`File renamed to "${fileName}" locally!`);
+    setIsEditModalOpen(false);
+    setFileToEdit(null);
+    setFileName("");
   };
 
   const handleFileSelect = (file: EditProjectFile) => {
@@ -318,10 +246,6 @@ export default function FileExplorer({
     () => files.find((i) => i.uid === currentEditProjectFileUid) || null,
     [currentEditProjectFileUid, files]
   );
-  const handleFetchAll = useCallback(() => {
-    trpcUtils.project.protectedUserProjectFileList.invalidate(project!.id);
-  }, [project, trpcUtils.project.protectedUserProjectFileList]);
-
   return (
     <div className="h-full flex flex-col bg-[#1e1e1e] relative">
       <div className="p-2 border-b border-gray-800 flex justify-between items-center">
@@ -336,20 +260,6 @@ export default function FileExplorer({
           >
             <Plus className="w-3.5 h-3.5" />
           </Button>
-          {session.status === "authenticated" && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6 text-gray-400 hover:text-emerald-400 hover:bg-[#252525] transition-colors"
-              onClick={handleFetchAll}
-              disabled={loading || demo}
-              title="Refresh"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
-              />
-            </Button>
-          )}
         </div>
       </div>
       {/* 

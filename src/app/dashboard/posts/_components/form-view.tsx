@@ -1,5 +1,6 @@
 "use client";
 
+import MediaLibraryNiceDialog from "@/components/attachment/media-gallery/media-library-nice-dialog";
 import TiptapEditor, {
   TiptapEditorRef,
 } from "@/components/tt-rich-editor/tiptap-editor";
@@ -14,15 +15,18 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Post } from "@/generated/prisma";
+import { Attachment } from "@/generated/prisma";
 import { useControlledToggle } from "@/hooks/use-controlled-toggle";
+import { showComponentNiceDialog } from "@/lib/nice-dialog";
+import { documentIdValidator } from "@/lib/schema";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { AdminPostDetailRouterOutputs } from "./types";
 
 const postFormSchema = z.object({
   title: z.string().min(2, {
@@ -39,11 +43,66 @@ const postFormSchema = z.object({
   content: z.string().min(10, {
     message: "Content must be at least 10 characters.",
   }),
+  thumbnailImageId: documentIdValidator().nullable().optional(),
 });
 
 type PostFormValues = z.infer<typeof postFormSchema>;
 
-export function PostFormView({ initialData }: { initialData?: Post | null }) {
+function ImageField({ value, onChange }: { value: Attachment["id"] | null, onChange: (id: Attachment["id"] | null) => void }) {
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const loadQuery = trpc.attachment.adminDetail.useQuery(value!, {
+    enabled: !!value,
+  });
+
+  const handleOpenMediaDialog = useCallback(() => {
+    showComponentNiceDialog<{
+      record: Attachment;
+      reason?: string;
+    }>(MediaLibraryNiceDialog, {
+      args: {
+        objectType: "Post",
+      },
+    }).then((result) => {
+      if (result?.result.record) {
+        const image = result.result.record;
+        if (image) {
+          const url = image.url;
+          setPreview(url);
+          onChange(image.id);
+        }
+      }
+    });
+  }, [onChange]);
+
+  useEffect(() => {
+    if (loadQuery.data) {
+      setPreview(loadQuery.data?.url || null);
+    } else {
+      setPreview(null);
+    }
+  }, [loadQuery.data,]);
+
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-1">Image</label>
+      <div
+        className="w-40 h-40 border border-dashed border-border rounded flex items-center justify-center cursor-pointer bg-muted hover:bg-muted/80 transition-colors"
+        onClick={handleOpenMediaDialog}
+        style={{ overflow: 'hidden' }}
+      >
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={preview} alt="Preview" className="object-cover w-full h-full" />
+        ) : (
+          <span className="text-muted-foreground">Click to select image</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function PostFormView({ initialData }: { initialData?: AdminPostDetailRouterOutputs | null }) {
   const trpcUtils = trpc.useUtils();
   const router = useRouter();
   const isEditMode = !!initialData; // Determine if in edit mode
@@ -52,6 +111,7 @@ export function PostFormView({ initialData }: { initialData?: Post | null }) {
     title: initialData?.title || "",
     content: initialData?.content || "",
     slug: initialData?.slug || "",
+    thumbnailImageId: initialData?.thumbnailImageId || null,
   };
 
   const editorRef = useRef<TiptapEditorRef>(null);
@@ -144,6 +204,7 @@ export function PostFormView({ initialData }: { initialData?: Post | null }) {
     }
   }, [controlledToggle.value, form, initialData]);
 
+
   return (
     <Card className="mx-auto w-full">
       <CardHeader>
@@ -154,6 +215,14 @@ export function PostFormView({ initialData }: { initialData?: Post | null }) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Image Field */}
+            <FormField
+              control={form.control}
+              name="thumbnailImageId"
+              render={({ field }) => (
+                <ImageField value={field.value || null} onChange={field.onChange} />
+              )}
+            />
             <div className="grid gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}

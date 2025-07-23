@@ -2,126 +2,129 @@
 
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
-import { Post } from "@/generated/prisma";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/format";
 import { trpc } from "@/utils/trpc";
-import { motion, Variants } from "framer-motion";
-import { ArrowRight, CalendarDays } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Calendar } from "lucide-react";
+import Image from "next/image";
+import { PublicPostListRouterOutputs } from "./_components/types";
+import Link from "next/link";
 
 /* ------------------------------------------------------------------ */
 /* 2.  Individual card                                                */
 /* ------------------------------------------------------------------ */
-function PostCard({ post }: { post: Post }) {
-  const router = useRouter();
 
+function PostCard({ post }: { post: PublicPostListRouterOutputs }) {
   return (
-    <motion.article
-      layout
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ type: "spring", stiffness: 120, damping: 18 }}
-      whileHover={{ y: -6 }}
-      className="group flex flex-col overflow-hidden rounded-xl border border-gray-800/50 bg-[#252525]/40 backdrop-blur-lg"
-    >
-      {/* Cover */}
-      {/* <Link href={`/posts/${post.id}`} className="block relative w-full pt-[56%] bg-gray-900">
-                <Image
-                    src={post.thumbnail}
-                    alt={post.title}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
-            </Link> */}
-
-      {/* Body */}
-      <div className="flex flex-col flex-1 p-6">
-        <h3 className="mb-2 text-xl font-semibold leading-snug text-white">
-          {post.title}
-        </h3>
-        {/* <p className="mb-4 flex-1 text-gray-400">{post.excerpt}</p> */}
-
-        {/* Meta */}
-        <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
-          {/* <span className="flex items-center gap-1">
-            <User size={14} /> {post.ownerId}
-          </span> */}
-          <span className="flex items-center gap-1">
-            <CalendarDays size={14} />
-            {post.createdAt.toLocaleDateString()}
-          </span>
+    <Card className="group hover:shadow-md transition-shadow">
+      {/* Thumbnail Image */}
+      {post.thumbnailImage && (
+        <div className="relative w-full h-48 overflow-hidden rounded-t-lg">
+          <Image
+            src={post.thumbnailImage.url || "/placeholder.svg"}
+            alt={post.title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
         </div>
+      )}
 
-        {/* Tags */}
-        {/* <div className="mt-4 flex flex-wrap gap-2">
-          {post.tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center gap-1 rounded-full border border-emerald-600/40 bg-emerald-600/10 px-2 py-0.5 text-xs text-emerald-300"
-            >
-              <Tag size={12} />
-              {tag}
-            </span>
-          ))}
-        </div> */}
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-lg line-clamp-2 mb-2">
+              <Link href={`/posts/${post.slug}`} className="hover:text-primary transition-colors">
+                {post.title}
+              </Link>
+            </CardTitle>
+            {post.excerpt && <CardDescription className="line-clamp-2">{post.excerpt}</CardDescription>}
+          </div>
+        </div>
+      </CardHeader>
 
-        {/* CTA */}
-        <motion.button
-          onClick={() => router.push(`/posts/${post.slug}`)}
-          whileHover={{ x: 4 }}
-          className="mt-5 inline-flex items-center text-emerald-400 hover:text-emerald-300"
-        >
-          Read more
-          <ArrowRight size={16} className="ml-1" />
-        </motion.button>
-      </div>
-    </motion.article>
-  );
+      <CardContent className="pt-0">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-4">
+            {/* {post.owner && (
+              <div className="flex items-center gap-2">
+                <Avatar className="w-5 h-5">
+                  <AvatarImage src="/placeholder.svg?height=20&width=20" />
+                  <AvatarFallback className="text-xs">
+                    {post.owner.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate">{post.owner.name}</span>
+              </div>
+            )} */}
+            <div className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              <span>{formatDate(post.createdAt)}</span>
+            </div>
+          </div>
+          <Badge variant="secondary" className="ml-2">
+            Published
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
-/* ------------------------------------------------------------------ */
-/* 3.  Page container                                                 */
-/* ------------------------------------------------------------------ */
-const grid: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.2 },
-  },
-};
-export default function PostsPage() {
-  const loadPostsQuery = trpc.post.publicList.useQuery();
-  return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-[#1e1e1e] text-white">
-        {/* You already have <Header /> / <Footer /> – import if needed */}
-        <main className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          {/* heading */}
-          <motion.h1
-            className="mb-12 text-4xl font-bold md:text-5xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 100, damping: 12 }}
-          >
-            Latest <span className="text-emerald-400">Posts</span>
-          </motion.h1>
 
-          {/* grid */}
-          <motion.div
-            variants={grid}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {loadPostsQuery.data?.items.map((p) => (
-              <PostCard key={p.id} post={p} />
-            ))}
-          </motion.div>
-        </main>
-      </div>
+export default function Page() {
+  const loadPostsQuery = trpc.post.publicList.useQuery()
+  const posts = loadPostsQuery.data?.items || []
+
+  return (
+    <div className="flex flex-col w-full min-h-screen">
+      {/* Header */}
+      <Header />
+
+      <main className="flex-1 p-6">
+        <div className="space-y-6">
+          {/* Page Header */}
+          <div>
+            <h1 className="text-3xl font-bold">Posts</h1>
+            <p className="text-muted-foreground mt-2">Manage your blog posts and articles</p>
+          </div>
+
+          {/* Posts Content */}
+          {loadPostsQuery.isLoading ? (
+            <div className="text-center py-12">
+              <div className="text-muted-foreground">Loading posts...</div>
+            </div>
+          ) : posts.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <div className="text-muted-foreground mb-4">
+                  No posts found.
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Results count */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {posts.length} post{posts.length !== 1 ? "s" : ""} found
+                </p>
+              </div>
+
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </main>
       <Footer />
-    </>
-  );
+    </div>
+  )
 }
