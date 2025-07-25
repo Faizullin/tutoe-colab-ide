@@ -43,7 +43,6 @@ const postFormSchema = z.object({
   index: z
     .number()
     .int()
-    .min(0, { message: "Index must be a non-negative integer." })
     .nullable()
     .optional(),
   content: z.string().min(10, {
