@@ -36,8 +36,9 @@ model UserAccount {
 }
 
 model Post {
-  id   Int    @id @default(autoincrement())
-  slug String @unique
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  index Int?
 
   owner   UserAccount? @relation(fields: [ownerId], references: [id])
   ownerId Int?

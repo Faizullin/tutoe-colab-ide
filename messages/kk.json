@@ -1,0 +1,19 @@
+{
+  "welcome": "Tutor Colab IDE-ге қош келдіңіз",
+  "modern_code_editor": "Заманауи код {editor}",
+  "editor": "Редактор",
+  "hero_description": "Ақылды ұсыныстарымен тиімді код жазуға көмектесетін қуатты код редакторы.",
+  "get_started": "Бастау",
+  "view_demo": "Демонстрацияны көру",
+  "visualization": "Визуализация",
+  "multi_language_support": "Көптілді қолдау",
+  "secure_environment": "Қауіпсіз орта",
+  "ready_to_get_started": "Бастауға дайынсыз ба?",
+  "try_today": "TutorIDE-ні бүгін байқап көріңіз",
+  "cta_description": "Біздің ақылды редакторымызбен код жазудың болашағын сезініңіз. Бірнеше минут ішінде жақсырақ код жазыңыз.",
+  "start_coding": "Код жазуды бастау",
+  "posts_list": "Жазбалар тізімі",
+  "post_detail": "Жазба туралы мәлімет",
+  "view_project": "Жобаны көру",
+  "no_codelab_data": "CodeLab деректері жоқ"
+}

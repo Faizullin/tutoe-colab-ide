@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/resizable";
 import { useControlledToggle } from "@/hooks/use-controlled-toggle";
 import { cn } from "@/lib/utils";
-import { useAIStore } from "@/store/useAIStore";
 import { defaultEditorOptions, SupportedLanguage } from "@/utils/editor-config";
 import { Editor } from "@monaco-editor/react";
 import { Maximize2, Smartphone, XCircle } from "lucide-react";
@@ -33,7 +32,7 @@ export function EditorRender() {
   const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState("files");
   const [collapsedSidebar, setCollapsedSidebar] = useState(false);
-  const { setCode: setAICode, setCodeForConversion } = useAIStore();
+  // const { setCode: setAICode, setCodeForConversion } = useAIStore();
   const editorRef = useRef<any>(null);
   const {
     code: fileContent,
@@ -80,8 +79,8 @@ export function EditorRender() {
       options?: { isDirty?: boolean; overrideFile?: EditProjectFile }
     ) => {
       setFileContent(content);
-      setCodeForConversion(content);
-      setAICode(content);
+      // setCodeForConversion(content);
+      // setAICode(content);
       if (options?.isDirty) {
         setIsDirty(options?.isDirty);
       } else {
@@ -95,7 +94,7 @@ export function EditorRender() {
           prev.map((f) =>
             f.uid === selectedFile.uid
               ? options?.overrideFile ||
-              ({ ...f, file: { ...f.file, content } } as EditProjectFile)
+                ({ ...f, file: { ...f.file, content } } as EditProjectFile)
               : f
           )
         );
@@ -103,8 +102,6 @@ export function EditorRender() {
     },
     [
       setFileContent,
-      setCodeForConversion,
-      setAICode,
       files,
       currentEditProjectFileUid,
     ]

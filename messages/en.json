@@ -1,0 +1,19 @@
+{
+  "welcome": "Welcome to Tutor Colab IDE",
+  "modern_code_editor": "Modern Code {editor}",
+  "editor": "Editor",
+  "hero_description": "A powerful code editor with smart suggestions to help you write code more efficiently.",
+  "get_started": "Get Started",
+  "view_demo": "View Demo",
+  "visualization": "Visualization",
+  "multi_language_support": "Multi-language support",
+  "secure_environment": "Secure environment",
+  "ready_to_get_started": "Ready to get started?",
+  "try_today": "Try TutorIDE today",
+  "cta_description": "Experience the future of coding with our intelligent editor. Start writing better code in minutes.",
+  "start_coding": "Start Coding",
+  "posts_list": "Posts List",
+  "post_detail": "Post Detail",
+  "view_project": "View Project",
+  "no_codelab_data": "No CodeLab data available"
+}

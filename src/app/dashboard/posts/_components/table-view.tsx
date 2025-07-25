@@ -114,6 +114,28 @@ export function PostTableView() {
         enableSorting: true,
       },
       {
+        accessorKey: "slug",
+        header: "Slug",
+        cell: ({ row }) => (
+          <div className="truncate max-w-[150px]">{row.original.slug}</div>
+        ),
+        enableSorting: true,
+        enableColumnFilter: true,
+      },
+      {
+        accessorKey: "index",
+        header: "Index",
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground">
+            {row.original.index}
+          </div>
+        ),
+        enableSorting: true,
+        enableColumnFilter: true,
+        enableHiding: false,
+        enableResizing: false,
+      },
+      {
         accessorKey: "title",
         header: "Title",
         cell: ({ row }) => (

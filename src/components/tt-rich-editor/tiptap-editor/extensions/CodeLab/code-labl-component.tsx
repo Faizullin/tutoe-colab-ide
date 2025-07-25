@@ -1,5 +1,6 @@
 import { Project } from '@/generated/prisma';
 import { NodeViewProps, NodeViewWrapper } from '@tiptap/react';
+import { FormattedMessage } from 'react-intl';
 
 export interface ProjectData {
   id: Project['id'];
@@ -23,11 +24,13 @@ export const CodeLabComponent = ({ node }: NodeViewProps) => {
             <h3 className="text-lg font-semibold">{obj.name}</h3>
             <p className="text-sm text-muted-foreground">{obj.description}</p>
             <a href={`/editor/${obj.slug}`} className="text-blue-500 hover:underline">
-              View Project
+              <FormattedMessage id="view_project" defaultMessage="View Project" />
             </a>
           </div>
         ) : (
-          <span className="text-red-500">No CodeLab data available</span>
+          <span className="text-red-500">
+            <FormattedMessage id="no_codelab_data" defaultMessage="No CodeLab data available" />
+          </span>
         )
       }
     </NodeViewWrapper>

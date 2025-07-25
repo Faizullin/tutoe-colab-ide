@@ -1,14 +1,14 @@
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
-import { Post } from "@/generated/prisma";
 import { trpcCaller } from "@/server/api/caller";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PostArticle from "../_components/post-article";
+import type { PublicPostGetBySlugRouterOutputs } from "../_components/types";
 
-// Add metadata export for dynamic title
-import type { Metadata } from "next";
-
-async function getPost(slug: string): Promise<Post | null> {
+async function getPost(
+  slug: string
+): Promise<PublicPostGetBySlugRouterOutputs | null> {
   const post = await trpcCaller.post.publicGetBySlug(slug);
   if (!post) {
     notFound();

@@ -40,6 +40,12 @@ const postFormSchema = z.object({
       message:
         "Slug must be lowercase and can only contain letters, numbers, and hyphens.",
     }),
+  index: z
+    .number()
+    .int()
+    .min(0, { message: "Index must be a non-negative integer." })
+    .nullable()
+    .optional(),
   content: z.string().min(10, {
     message: "Content must be at least 10 characters.",
   }),
@@ -111,6 +117,7 @@ export function PostFormView({ initialData }: { initialData?: AdminPostDetailRou
     title: initialData?.title || "",
     content: initialData?.content || "",
     slug: initialData?.slug || "",
+    index: initialData?.index ?? null,
     thumbnailImageId: initialData?.thumbnailImageId || null,
   };
 
@@ -142,6 +149,9 @@ export function PostFormView({ initialData }: { initialData?: AdminPostDetailRou
       form.reset({
         title: response.post.title,
         content: response.post.content || "",
+        slug: response.post.slug,
+        index: response.post.index ?? null,
+        thumbnailImageId: response.post.thumbnailImageId || null,
       });
       trpcUtils.post.adminDetail.invalidate();
     },
@@ -223,7 +233,7 @@ export function PostFormView({ initialData }: { initialData?: AdminPostDetailRou
                 <ImageField value={field.value || null} onChange={field.onChange} />
               )}
             />
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-3">
               <FormField
                 control={form.control}
                 name="title"
@@ -247,10 +257,30 @@ export function PostFormView({ initialData }: { initialData?: AdminPostDetailRou
                     <FormControl>
                       <Input placeholder="my-awesome-project" {...field} />
                     </FormControl>
-                    {/* <FormDescription>
-                      A unique, URL-friendly identifier for your post (e.g.,
-                      my-awesome-post).
-                    </FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="index"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Index</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Index (optional)"
+                        value={field.value ?? ""}
+                        onChange={e =>
+                          field.onChange(
+                            e.target.value === "" ? null : Number(e.target.value)
+                          )
+                        }
+                        min={0}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

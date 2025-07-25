@@ -10,7 +10,7 @@ export default function BackButton() {
         <motion.button
             onClick={() => router.back()}
             whileHover={{ x: -4 }}
-            className="mb-10 inline-flex items-center text-emerald-400 hover:text-emerald-300"
+            className="mb-10 inline-flex items-center"
         >
             <ArrowLeft size={18} className="mr-1" />
             Back

@@ -1,16 +1,15 @@
-"use client"
+"use client";
 
-import Footer from "@/components/layout/footer"
-import Header from "@/components/layout/header"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, CheckCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
+import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { FormattedMessage } from "react-intl";
 
 export default function Home() {
-  const router = useRouter()
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -19,39 +18,75 @@ export default function Home() {
         {/* Hero Section */}
         <section className="text-center mb-20">
           <Badge variant="secondary" className="mb-4">
-            Welcome to Tutor Colab IDE
+            <FormattedMessage
+              id="welcome"
+              defaultMessage="Welcome to Tutor Colab IDE"
+            />
           </Badge>
 
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Modern Code <span className="text-primary">Editor</span>
+            <FormattedMessage
+              id="modern_code_editor"
+              defaultMessage="Modern Code {editor}"
+              values={{
+                editor: (
+                  <span className="text-primary">
+                    <FormattedMessage id="editor" defaultMessage="Editor" />
+                  </span>
+                ),
+              }}
+            />
           </h1>
 
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            A powerful code editor with smart suggestions to help you write code more efficiently.
+            <FormattedMessage
+              id="hero_description"
+              defaultMessage="A powerful code editor with smart suggestions to help you write code more efficiently."
+            />
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={() => router.push("/posts")} className="group">
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button variant="outline" size="lg" onClick={() => router.push("/editor/demo")}>
-              View Demo
-            </Button>
+            <Link href="/posts" passHref>
+              <Button asChild size="lg" className="group">
+                <span>
+                  <FormattedMessage
+                    id="get_started"
+                    defaultMessage="Get Started"
+                  />
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Button>
+            </Link>
+            <Link href="/editor/demo" passHref>
+              <Button asChild variant="outline" size="lg">
+                <span>
+                  <FormattedMessage id="view_demo" defaultMessage="View Demo" />
+                </span>
+              </Button>
+            </Link>
           </div>
 
           <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-muted-foreground">
             <div className="flex items-center">
               <CheckCircle className="h-4 w-4 text-primary mr-2" />
-              Visualization
+              <FormattedMessage
+                id="visualization"
+                defaultMessage="Visualization"
+              />
             </div>
             <div className="flex items-center">
               <CheckCircle className="h-4 w-4 text-primary mr-2" />
-              Multi-language support
+              <FormattedMessage
+                id="multi_language_support"
+                defaultMessage="Multi-language support"
+              />
             </div>
             <div className="flex items-center">
               <CheckCircle className="h-4 w-4 text-primary mr-2" />
-              Secure environment
+              <FormattedMessage
+                id="secure_environment"
+                defaultMessage="Secure environment"
+              />
             </div>
           </div>
         </section>
@@ -108,19 +143,37 @@ export default function Home() {
           <Card className="max-w-4xl mx-auto">
             <CardContent className="p-12">
               <Badge variant="secondary" className="mb-4">
-                Ready to get started?
+                <FormattedMessage
+                  id="ready_to_get_started"
+                  defaultMessage="Ready to get started?"
+                />
               </Badge>
 
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Try TutorIDE today</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                <FormattedMessage
+                  id="try_today"
+                  defaultMessage="Try TutorIDE today"
+                />
+              </h2>
 
               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Experience the future of coding with our intelligent editor. Start writing better code in minutes.
+                <FormattedMessage
+                  id="cta_description"
+                  defaultMessage="Experience the future of coding with our intelligent editor. Start writing better code in minutes."
+                />
               </p>
 
-              <Button size="lg" onClick={() => router.push("/editor/demo")} className="group">
-                Start Coding
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <Link href="/editor/demo" passHref>
+                <Button asChild size="lg" className="group">
+                  <span>
+                    <FormattedMessage
+                      id="start_coding"
+                      defaultMessage="Start Coding"
+                    />
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </section>
@@ -128,5 +181,5 @@ export default function Home() {
 
       <Footer />
     </div>
-  )
+  );
 }

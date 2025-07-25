@@ -1,0 +1,19 @@
+{
+  "welcome": "Добро пожаловать в Tutor Colab IDE",
+  "modern_code_editor": "Современный код {editor}",
+  "editor": "Редактор",
+  "hero_description": "Мощный редактор кода с умными подсказками, которые помогут писать код эффективнее.",
+  "get_started": "Начать",
+  "view_demo": "Посмотреть демо",
+  "visualization": "Визуализация",
+  "multi_language_support": "Многоязычная поддержка",
+  "secure_environment": "Безопасная среда",
+  "ready_to_get_started": "Готовы начать?",
+  "try_today": "Попробуйте TutorIDE сегодня",
+  "cta_description": "Ощутите будущее написания кода с нашим интеллектуальным редактором. Начните писать лучший код за минуты.",
+  "start_coding": "Начать кодинг",
+  "posts_list": "Список постов",
+  "post_detail": "Детали поста",
+  "view_project": "Посмотреть проект",
+  "no_codelab_data": "Нет данных CodeLab"
+}
