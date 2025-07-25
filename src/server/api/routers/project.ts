@@ -1,7 +1,7 @@
 import { documentIdValidator } from "@/lib/schema";
 import z from "zod";
 import { baseQueryInputSchema } from "../schema";
-import { adminProcedure, protectedProcedure, router } from "../trpc";
+import { adminProcedure, protectedProcedure, publicProcedure, router } from "../trpc";
 
 const queryFilterSchema = baseQueryInputSchema.shape.filter.unwrap().extend({
   name: z
@@ -147,7 +147,7 @@ export const projectRouter = router({
   //   });
   // }),
 
-  protectedUserProjectDetailBySlug: protectedProcedure
+  protectedUserProjectDetailBySlug: publicProcedure
     .input(documentSlugValidator())
     .query(async ({ input, ctx }) => {
       const projectObj = await ctx.prisma.project.findUnique({
@@ -171,7 +171,7 @@ export const projectRouter = router({
       return projectObj;
     }),
 
-  protectedUserProjectFileList: protectedProcedure
+  protectedUserProjectFileList: publicProcedure
     .input(documentIdValidator())
     .query(async ({ input, ctx }) => {
       // const userId = ctx.session!.user.id;

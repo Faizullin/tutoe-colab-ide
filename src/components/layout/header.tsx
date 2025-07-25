@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { useUser } from "@clerk/nextjs";
+import { SignOutButton, useUser } from "@clerk/nextjs";
 import { useLanguage } from "@/store/language-context";
 
 export default function Header() {
@@ -99,14 +99,8 @@ export default function Header() {
                     Profile
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-gray-800" />
-                  <DropdownMenuItem
-                    className="text-red-400 cursor-pointer"
-                    onClick={() => {
-                      // Handle sign out
-                      console.log("Sign out");
-                    }}
-                  >
-                    Sign Out
+                  <DropdownMenuItem className="text-red-400 cursor-pointer">
+                    <SignOutButton />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -199,13 +193,8 @@ export default function Header() {
                         variant="outline"
                         size="default"
                         className="w-full mt-6 border-gray-700 text-red-400 hover:bg-[#252525] hover:text-white"
-                        onClick={() => {
-                          // Handle sign out
-                          console.log("Sign out");
-                          setIsMenuOpen(false);
-                        }}
                       >
-                        Sign Out
+                        <SignOutButton />
                       </Button>
                     )}
                   </div>
